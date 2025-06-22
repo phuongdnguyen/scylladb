@@ -14,16 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: false
-
-      - name: Update submodule URLs to original ScyllaDB org
-        run: |
-          sed -i 's|https://github.com/[^/]*/seastar.git|https://github.com/scylladb/seastar.git|g' .gitmodules
-          sed -i 's|https://github.com/[^/]*/tools-java.git|https://github.com/scylladb/tools-java.git|g' .gitmodules
-          sed -i 's|https://github.com/[^/]*/tools-jmx.git|https://github.com/scylladb/tools-jmx.git|g' .gitmodules
-          sed -i 's|https://github.com/[^/]*/tools-python3.git|https://github.com/scylladb/tools-python3.git|g' .gitmodules
-          git submodule sync
-          git submodule update --init --recursive
+          submodules: recursive
 
       - name: Set up QEMU for ARM emulation
         uses: docker/setup-qemu-action@v3
