@@ -1,0 +1,52 @@
+name: Build ScyllaDB Docker Image (ARM64)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - debug-scylla-5.2.0
+
+jobs:
+  build-arm64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up QEMU for ARM emulation
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build build-essential python3 python3-pip
+
+      - name: Configure build (debug mode, arm64)
+        run: |
+          ./tools/toolchain/dbuild ./configure.py --mode=debug
+
+      - name: Build ScyllaDB (debug mode, arm64)
+        run: |
+          ./tools/toolchain/dbuild ninja -C build/debug/seastar
+
+      - name: Build distribution artifacts (debug mode, arm64)
+        run: |
+          ./tools/toolchain/dbuild ninja dist-debug
+
+      - name: Build Docker image for ARM64
+        run: |
+          ./dist/docker/debian/build_docker.sh --mode debug
+
+      - name: Upload OCI archive as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scylladb-arm64-oci-image
+          path: build/debug/dist/docker/*.oci-archive*
