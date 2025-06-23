@@ -8,7 +8,12 @@ on:
 
 jobs:
   build-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04-arm
+            arch: arm64
 
     steps:
       - name: Checkout code
